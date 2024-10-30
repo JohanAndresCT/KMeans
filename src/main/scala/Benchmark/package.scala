@@ -26,7 +26,7 @@ package object Benchmark {
     (tiempoSeq, tiempoPar, tiempoSeq.value / tiempoPar.value)
   }
 
-  def probarKmedianas(puntos:Seq[Punto], k:Int, eta:Double) = {
+  def probarKmedianasSeq(puntos:Seq[Punto], k:Int, eta:Double) = {
     // Probar lo secuencial
     val puntosSeq = puntos
     val medianasSeq = inicializarMedianas(k, puntosSeq)
@@ -80,10 +80,12 @@ package object Benchmark {
 
 
     Plotly.plot("kmedianasSeq.html", dataSeq, layoutSeq)
+  }
 
+  def probarKmedianasPar(puntos:Seq[Punto], k:Int, eta:Double) = {
     // Probar lo paralelo
     val puntosPar = puntos
-    val medianasPar = medianasSeq
+    val medianasPar = inicializarMedianas(k, puntosPar)
     val medianasParfin = kMedianasPar(puntosPar, medianasPar, eta)
     val clasifFinalPar = clasificarPar(umbral(puntosPar.length))(puntosPar,medianasParfin)
     val tiempoPar = tiempoDe(kMedianasPar(puntosPar, medianasPar, eta))
@@ -132,8 +134,8 @@ package object Benchmark {
 
     val layoutPar = Layout().withTitle("Plotting de puntos al azar y medianas iniciales y finales - Versión Paralela")
 
+
     Plotly.plot("kmedianasPar.html", dataPar.toSeq, layoutPar)
-    (tiempoSeq, tiempoPar, tiempoSeq.value/tiempoPar.value)
   }
 }
 

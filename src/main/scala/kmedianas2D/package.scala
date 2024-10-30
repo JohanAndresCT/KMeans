@@ -48,16 +48,19 @@ package object kmedianas2D {
 
   // Implementación concurrente de la clasificación
   def clasificarPar(umb: Int)(puntos: Seq[Punto], medianas: Seq[Punto]): Map[Punto, Seq[Punto]] = {
-    if (puntos.size > umb) {
+    if (puntos.length > umb){
       val (left, right) = puntos.splitAt(puntos.size / 2)
-      val leftMap = clasificarPar(umb)(left, medianas)
-      val rightMap = clasificarPar(umb)(right, medianas)
-      (leftMap ++ rightMap).groupBy(_._1).map {
-        case (k, v) => k -> v.flatMap(_._2).toSeq
-      }
-    } else {
-      clasificarSeq(puntos, medianas)
+      val (leftMap, rightMap) = parallel(clasificarPar(umb)(left, medianas), clasificarPar(umb)(right, medianas))
+      val clasification = (for {
+        key <- leftMap.keySet ++ rightMap.keySet
+      } yield {
+        val leftValues = leftMap.getOrElse(key, Seq())
+        val rightValues = rightMap.getOrElse(key, Seq())
+        key -> (leftValues ++ rightValues)
+      }).toMap
+      clasification
     }
+    else clasificarSeq(puntos, medianas)
   }
 
   /** 1.2. Actualizando las medianas * */
@@ -135,7 +138,4 @@ package object kmedianas2D {
     val rand = new Random(7)
     (0 until k).map(_ => puntos(rand.nextInt(puntos.length)))
   }
-
 }
-
-
